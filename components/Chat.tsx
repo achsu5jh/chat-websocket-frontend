@@ -1,19 +1,10 @@
 import React, { useState } from 'react';
-import {
-  Box,
-  IconButton,
-  TextField,
-  Typography,
-  Paper,
-  List,
-  ListItem,
-  ListItemText,
-  Avatar,
-  Menu,
-  MenuItem,
-} from '@mui/material';
+import { Box, IconButton, TextField, Paper, List, ListItem, ListItemText } from '@mui/material';
 import SendIcon from '@mui/icons-material/Send';
+import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 import { styled } from '@mui/system';
+import { useMediaQuery, Theme } from '@mui/material';
+import MobileUserSessionList from './MobileUserSessionList'; 
 
 const ChatContainer = styled(Paper)(({ theme }) => ({
   display: 'flex',
@@ -21,10 +12,16 @@ const ChatContainer = styled(Paper)(({ theme }) => ({
   height: '80vh',
   maxWidth: '600px',
   padding: theme.spacing(2),
-  position: 'relative', // Ensure position relative for absolute positioning of Avatar
+  position: 'relative',
 }));
 
 const MessagesContainer = styled(Box)({
+  flex: 1,
+  overflowY: 'auto',
+  marginBottom: '16px',
+});
+
+const MobileUserListContainer = styled(Box)({
   flex: 1,
   overflowY: 'auto',
   marginBottom: '16px',
@@ -35,21 +32,21 @@ const InputContainer = styled(Box)({
   alignItems: 'center',
 });
 
-const AvatarWrapper = styled('div')(({ theme }) => ({
+const SignOutIconWrapper = styled('div')(({ theme }) => ({
   position: 'absolute',
   top: theme.spacing(3),
   right: theme.spacing(3),
-  cursor: 'pointer', // Add cursor pointer for clickable behavior
 }));
 
 interface ChatProps {
   messages: string[];
   onSendMessage: (message: string) => void;
+  onSignOut: () => void;
 }
 
-const Chat: React.FC<ChatProps> = ({ messages, onSendMessage }) => {
+const Chat: React.FC<ChatProps> = ({ messages, onSendMessage, onSignOut }) => {
   const [newMessage, setNewMessage] = useState('');
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null); // State for anchor element of the menu
+  const isMobile = useMediaQuery((theme: Theme) => theme.breakpoints.down('md'));
 
   const handleSendMessage = () => {
     if (newMessage.trim()) {
@@ -58,28 +55,18 @@ const Chat: React.FC<ChatProps> = ({ messages, onSendMessage }) => {
     }
   };
 
-  const handleClickAvatar = (event: React.MouseEvent<HTMLDivElement>) => {
-    setAnchorEl(event.currentTarget); // Open the menu when clicking on avatar
-  };
-
-  const handleCloseMenu = () => {
-    setAnchorEl(null); // Close the menu
-  };
-
-  const handleLogout = () => {
-    // Implement logout logic here
-    console.log('Logging out...');
-    handleCloseMenu(); // Close menu after logout action
-  };
-
   return (
     <ChatContainer>
-      {/* <Typography variant="h5" gutterBottom>
-        Chat
-      </Typography> */}
-      <AvatarWrapper onClick={handleClickAvatar}>
-        <Avatar alt="Profile" src="/path_to_your_profile_image.jpg" />
-      </AvatarWrapper>
+      {isMobile && (
+        <MobileUserListContainer mt={6}>
+          <MobileUserSessionList onSelectSession={(session: string) => {}}/>
+        </MobileUserListContainer>
+      )}
+      <SignOutIconWrapper>
+        <IconButton color="primary" onClick={onSignOut}>
+          <ExitToAppIcon />
+        </IconButton>
+      </SignOutIconWrapper>
       <MessagesContainer mt={12}>
         <List>
           {messages.map((message, index) => (
@@ -107,21 +94,6 @@ const Chat: React.FC<ChatProps> = ({ messages, onSendMessage }) => {
           <SendIcon fontSize="large" />
         </IconButton>
       </InputContainer>
-      <Menu
-        anchorEl={anchorEl}
-        open={Boolean(anchorEl)}
-        onClose={handleCloseMenu}
-        anchorOrigin={{
-          vertical: 'top',
-          horizontal: 'right',
-        }}
-        transformOrigin={{
-          vertical: 'top',
-          horizontal: 'right',
-        }}
-      >
-        <MenuItem onClick={handleLogout}>Logout</MenuItem>
-      </Menu>
     </ChatContainer>
   );
 };
